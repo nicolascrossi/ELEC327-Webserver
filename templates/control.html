@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style type="text/css">
+        <!--
+         .tab { margin-left: 40px; }
+        -->
+    </style>
+
+    <script type="text/javascript">
+        function check_set_event() {
+            if (document.getElementById('set_event').checked) {
+                document.getElementById('if_set_event').style.display = "block";
+            } else {
+                document.getElementById('if_set_event').style.display = "none";
+            }
+        }
+    </script>
+</head>
+<body>
+<form action="/control_form" enctype="multipart/form-data" method="POST">
+    <input type="radio" id="light_on" name="options" value="light_on" onclick="javascript:check_set_event();">
+    <label for="light_on">Turn light on</label><br>
+
+    <input type="radio" id="light_off" name="options" value="light_off" onclick="javascript:check_set_event();">
+    <label for="light_off">Turn light off</label><br>
+
+    <input type="radio" id="set_event" name="options" value="set_event" onclick="javascript:check_set_event();">
+    <label for="set_event">Schedule an event</label><br>
+
+    <div class="tab" id="if_set_event" style="display:none">
+        <input type="radio" id="e_light_on" name="e_options" value="e_light_on">
+        <label for="e_light_on">Turn light on</label><br>
+
+        <input type="radio" id="e_light_off" name="e_options" value="e_light_off">
+        <label for="e_light_off">Turn light off</label><br>
+
+        <label for="e_time">Choose a time: </label>
+        <input type="time" id="e_time" name="e_time" value="00:00"><br>
+    </div>
+
+    <br>
+    <input type="submit" value="Submit">
+</form>
+</body>
+</html>
