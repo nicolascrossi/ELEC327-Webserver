@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
+import logging
 import schedule
 import time
 import threading
@@ -8,6 +9,8 @@ app = Flask(__name__)
 
 jobs: [schedule.Job] = []
 
+logger = logging.getLogger("werkzeug")
+logger.setLevel(logging.error)
 
 def send_ip(ip: str):
     print(f"Sending ip: {ip}")
