@@ -10,7 +10,7 @@ app = Flask(__name__)
 jobs: [schedule.Job] = []
 
 logger = logging.getLogger("werkzeug")
-logger.setLevel(logging.error)
+logger.setLevel(logging.ERROR)
 
 def send_ip(ip: str):
     print(f"Sending ip: {ip}")
