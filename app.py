@@ -1,16 +1,50 @@
+from typing import List
 from flask import Flask, render_template, request, redirect, url_for
-import logging
+# import logging
 import schedule
 import time
 import threading
 import socket
 
+import os
+
 app = Flask(__name__)
 
-jobs: [schedule.Job] = []
+jobs: List[schedule.Job] = []
 
-logger = logging.getLogger("werkzeug")
-logger.setLevel(logging.ERROR)
+# logger = logging.getLogger("werkzeug")
+# logger.setLevel(logging.ERROR)
+
+socket_path = "/home/nicorossi/csprojects/ELEC327-Webserver/ipc.sock"
+
+try:
+    os.unlink(socket_path)
+except OSError:
+    pass
+
+sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+
+sock.connect(socket_path)
+
+ip = "192.168.1.1"
+tst = bytearray(len(ip) + 1)
+
+# for idx, c in ip:
+#     tst[idx] = 
+
+tst = bytes(ip, 'utf-8')
+
+
+# sock.send(tst)
+
+ba = bytearray(5)
+ba[0] = 1
+ip = [192, 168, 1, 1]
+for i in range(1, 5):
+    ba[i] = ip[i - 1]
+
+print(ba)
+
 
 def send_ip(ip: str):
     print(f"Sending ip: {ip}")
@@ -28,7 +62,7 @@ def light_on():
 
 
 def jobs_sort(job: schedule.Job):
-    return job.at_time
+    return job.at_time if job.at_time else 0
 
 
 def run_continuously(interval=1):
