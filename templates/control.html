@@ -19,6 +19,18 @@
             }
         }
     </script>
+
+    <script type="text/javascript">
+        function check_manage_event() {
+            if (document.getElementById('add_event').checked) {
+                document.getElementById('if_add_event').style.display = "block";
+                document.getElementById('if_remove_event').style.display = "none";
+            } else {
+                document.getElementById('if_add_event').style.display = "none";
+                document.getElementById('if_remove_event').style.display = "block";
+            }
+        }
+    </script>
 </head>
 <body>
 <form action="/control_form" enctype="multipart/form-data" method="POST">
@@ -29,17 +41,35 @@
     <label for="light_off">Turn light off</label><br>
 
     <input type="radio" id="set_event" name="options" value="set_event" onclick="javascript:check_set_event();">
-    <label for="set_event">Schedule an event</label><br>
+    <label for="set_event">Manage events</label><br>
 
     <div class="tab" id="if_set_event" style="display:none">
-        <input type="radio" id="e_light_on" name="e_options" value="e_light_on">
-        <label for="e_light_on">Turn light on</label><br>
+        <input type="radio" id="add_event" name="e_mod_type" value="add_event" onclick="javascript:check_manage_event();">
+        <label for="add_event">Add event</label>
 
-        <input type="radio" id="e_light_off" name="e_options" value="e_light_off">
-        <label for="e_light_off">Turn light off</label><br>
+        <input type="radio" id="remove_event" name="e_mod_type" value="remove_event" onclick="javascript:check_manage_event();">
+        <label for="remove_event">Remove event</label><br>
 
-        <label for="e_time">Choose a time: </label>
-        <input type="time" id="e_time" name="e_time" value="00:00"><br>
+        <div class="tab" id="if_add_event" style="display:none">
+            <input type="radio" id="e_light_on" name="e_options" value="e_light_on">
+            <label for="e_light_on">Turn light on</label><br>
+
+            <input type="radio" id="e_light_off" name="e_options" value="e_light_off">
+            <label for="e_light_off">Turn light off</label><br>
+
+            <label for="e_time">Choose a time: </label>
+            <input type="time" id="e_time" name="e_time" value="00:00"><br>
+        </div>
+
+        <div class="tab" id="if_remove_event" style="display:none">
+            <label for="events">Event to delete</label>
+            <select name="events" id="events">
+                {% for e in set_events %}
+                    <option value="{{ e }}">{{ e }}</option>
+                {% endfor %}
+            </select><br>
+        </div>
+
     </div>
 
     <br>
