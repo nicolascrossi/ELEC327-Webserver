@@ -6,6 +6,7 @@ import schedule
 import time
 import threading
 import socket
+import signal
 
 app = Flask(__name__)
 
@@ -53,6 +54,15 @@ def run_continuously(interval=1):
 
 
 end_scheduler = run_continuously()
+
+
+def quit_handler(signum, frame):
+    print("Shutting down scheduler...")
+    end_scheduler.set()
+    exit(0)
+
+
+signal.signal(signal.SIGINT, quit_handler)
 
 
 @app.route("/")
