@@ -4,5 +4,4 @@
 !Makfile
 !app.py
 !/temmplates/
-!ipc.c
-!ipc.py
+!stdin_recv.c
