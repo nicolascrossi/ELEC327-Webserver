@@ -1,5 +1,5 @@
+import datetime
 import sys
-from datetime import datetime
 from typing import List, Tuple
 
 from flask import Flask, render_template, request, redirect, url_for
@@ -9,51 +9,29 @@ import threading
 import socket
 import signal
 
+IP_HDR = "IP_ADDR"
+OFF_HDR = "LIGHT_OFF"
+ON_HDR = "LIGHT_ON"
+
 app = Flask(__name__)
 
 # [(time, str rep, job object), ...]
 jobs: List[Tuple[datetime.time, str, schedule.Job]] = []
 
-ipc_sock: socket.socket | None = None
-
-
-def setup_ipc(path: str) -> socket.socket:
-    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    sock.connect(path)
-    return sock
-
 
 def send_ip(ip: str):
-    print(f"Sending ip: {ip}")
-    if ipc_sock:
-        msg_bytes = bytes(ip)
-        msg_arr = bytearray(2 + len(ip))
-        msg_arr[0] = 2  # Sending ip
-        msg_arr[1] = len(ip)  # Length of ip str
-        for i in range(len(ip)):
-            msg_arr[i + 2] = msg_bytes[i]  # Set ip str bytes
-
-        ipc_sock.send(msg_arr)
+    print(f"{IP_HDR}:{ip}", flush=True)
+    print("[SERVER] Sent ip", file=sys.stderr, flush=True)
 
 
 def light_off():
-    print("light off")
-    if ipc_sock:
-        msg_arr = bytearray(2)
-        msg_arr[0] = 0  # Light off
-        msg_arr[0] = 0  # Len 0
-
-        ipc_sock.send(msg_arr)
+    print(f"{OFF_HDR}", flush=True)
+    print("[SERVER] Sent off", file=sys.stderr, flush=True)
 
 
 def light_on():
-    print("light on")
-    if ipc_sock:
-        msg_arr = bytearray(2)
-        msg_arr[0] = 1  # Light on
-        msg_arr[0] = 0  # Len 0
-
-        ipc_sock.send(msg_arr)
+    print(f"{ON_HDR}", flush=True)
+    print("[SERVER] Sent on", file=sys.stderr, flush=True)
 
 
 def jobs_sort(job: Tuple[datetime.time, str, schedule.Job]):
@@ -155,10 +133,6 @@ def events():
 
 if __name__ == '__main__':
     # app.run(debug=True, host='0.0.0.0')
-    if sys.argv != 2:
-        print("Make sure to specify an IPC socket path")
-        exit(1)
 
-    ipc_sock = setup_ipc(sys.argv[1])
     send_ip(socket.gethostbyname(socket.gethostname()))
-    app.run(debug=True)
+    app.run(debug=False)
