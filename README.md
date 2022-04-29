@@ -1,3 +1,3 @@
 # ELEC327-Webserver
 
-python app.py | <target>
+`python app.py | <target>`
