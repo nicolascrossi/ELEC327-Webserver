@@ -31,6 +31,11 @@ main(int argc, char **argv)
         if (count > sizeof(IP_HEADER) && strncmp(line, IP_HEADER, sizeof(IP_HEADER) - 1) == 0) 
         { // Ensure that there is both IP_HEADER present, some separating character, and at least one character representing the address after
             printf("Received ip: %s", line + sizeof(IP_HEADER));
+            int i;
+            for (i = 0; i < count; i++) {
+                printf("%X ", line[i]);
+            }
+            printf("\n");
         } 
         else if (count >= sizeof(LIGHT_OFF) - 1 && strncmp(line, LIGHT_OFF, sizeof(LIGHT_OFF) - 1) == 0)
         { // Just make sure there's enough bytes to compare LIGHT_OFF
