@@ -59,7 +59,8 @@ static void transfer(int fd, uint8_t *tx, uint8_t len)
     //     0x0A 
 	// };
 	// uint8_t rx[len] = {0, };
-	uint8_t *rx = malloc(sizeof(len));
+	uint8_t *rx = malloc(len);
+	memset(rx, 0, len);
 	struct spi_ioc_transfer tr = {
 		.tx_buf = (unsigned long)tx,
 		.rx_buf = (unsigned long)rx,
