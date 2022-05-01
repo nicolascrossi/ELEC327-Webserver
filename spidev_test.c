@@ -58,7 +58,8 @@ static void transfer(int fd, uint8_t *tx, uint8_t len)
     //     0x57, 0x4F, 0x52, 0x4C, 0x44,
     //     0x0A 
 	// };
-	uint8_t rx[len] = {0, };
+	// uint8_t rx[len] = {0, };
+	uint8_t *rx = malloc(sizeof(len));
 	struct spi_ioc_transfer tr = {
 		.tx_buf = (unsigned long)tx,
 		.rx_buf = (unsigned long)rx,
@@ -72,6 +73,7 @@ static void transfer(int fd, uint8_t *tx, uint8_t len)
 	if (ret < 1)
 		pabort("can't send spi message");
 
+	free(rx);
     /*
 	for (ret = 0; ret < ARRAY_SIZE(tx); ret++) {
 		if (!(ret % 6))
