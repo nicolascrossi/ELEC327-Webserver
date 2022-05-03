@@ -54,6 +54,12 @@ static uint8_t msg_prank_on[MSG_LEN] = {PRANK_ON_CODE, END};
 
 static void transfer(int fd, uint8_t *tx, uint8_t len)
 {
+	uint8_t i;
+	for (i = 0; i < len; i++) {
+		printf("%X ", tx[i]);
+	}
+	printf("\n");
+	
 	int ret;
 	// uint8_t tx[] = {
     //     0x48, 0x45, 0x4C, 0x4C, 0x4F,
@@ -245,7 +251,7 @@ int main(int argc, char *argv[])
 
 			line[sizeof(IP_ADDR) - 1] =  count - sizeof(IP_ADDR) - 1 + 1;
 			line[sizeof(IP_ADDR) - 2] = IP_ADDR_CODE;
-			line[count] = END;
+			line[count - 1] = END;
 			transfer(fd, (uint8_t *) line + sizeof(IP_ADDR) - 2, count - sizeof(IP_ADDR) - 1 + 2 + 1);
 		}
 		else if (count >= sizeof(LIGHT_OFF) - 1 && strncmp(line, LIGHT_OFF, sizeof(LIGHT_OFF) - 1) == 0)
