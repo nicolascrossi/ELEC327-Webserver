@@ -145,7 +145,6 @@ def events():
 
 if __name__ == '__main__':
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
     while True:
         try:
             s.connect(('8.8.8.8', 1))

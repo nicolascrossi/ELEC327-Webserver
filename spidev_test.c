@@ -30,11 +30,12 @@
 #define LIGHT_OFF "LIGHT_OFF"
 #define PRANK_ON "PRANK_ON"
 
-#define LIGHT_OFF_CODE 1
-#define LIGHT_ON_CODE 2
-#define IP_ADDR_CODE 3
-#define PRANK_ON_CODE 4
-
+#define END 1
+#define LIGHT_OFF_CODE 2
+#define LIGHT_ON_CODE 3
+#define IP_ADDR_CODE 4
+#define PRANK_ON_CODE 5
+#define MSG_LEN 2
 static void pabort(const char *s)
 {
 	perror(s);
@@ -47,10 +48,9 @@ static uint8_t bits = 8;
 static uint32_t speed = 500000;
 static uint16_t delay;
 
-static uint8_t msg_len = 1;
-static uint8_t msg_off[1] = {LIGHT_OFF_CODE};
-static uint8_t msg_on[1] = {LIGHT_ON_CODE};
-static uint8_t msg_prank_on[1] = {PRANK_ON_CODE}
+static uint8_t msg_off[MSG_LEN] = {LIGHT_OFF_CODE, END};
+static uint8_t msg_on[MSG_LEN] = {LIGHT_ON_CODE, END};
+static uint8_t msg_prank_on[MSG_LEN] = {PRANK_ON_CODE, END};
 
 static void transfer(int fd, uint8_t *tx, uint8_t len)
 {
@@ -243,24 +243,25 @@ int main(int argc, char *argv[])
 		{
 			printf("Received IP: %s", line + sizeof(IP_ADDR));
 
-			line[sizeof(IP_ADDR) - 1] =  count - sizeof(IP_ADDR) - 1;
+			line[sizeof(IP_ADDR) - 1] =  count - sizeof(IP_ADDR) - 1 + 1;
 			line[sizeof(IP_ADDR) - 2] = IP_ADDR_CODE;
-			transfer(fd, (uint8_t *) line + sizeof(IP_ADDR) - 2, count - sizeof(IP_ADDR) - 1 + 2);
+			line[count] = END;
+			transfer(fd, (uint8_t *) line + sizeof(IP_ADDR) - 2, count - sizeof(IP_ADDR) - 1 + 2 + 1);
 		}
 		else if (count >= sizeof(LIGHT_OFF) - 1 && strncmp(line, LIGHT_OFF, sizeof(LIGHT_OFF) - 1) == 0)
 		{
 			printf("Received LIGHT_OFF: %s", line);
-			transfer(fd, msg_off, msg_len);
+			transfer(fd, msg_off, MSG_LEN);
 		}
 		else if (count >= sizeof(LIGHT_ON) - 1 && strncmp(line, LIGHT_ON, sizeof(LIGHT_ON) - 1) == 0)
 		{
 			printf("Received LIGHT_ON: %s", line);
-			transfer(fd, msg_on, msg_len);
+			transfer(fd, msg_on, MSG_LEN);
 		}
 		else if (count >= sizeof(PRANK_ON) - 1 && strncmp(line, PRANK_ON, sizeof(PRANK_ON) - 1) == 0)
 		{
 			printf("Received PRANK_ON: %s", line);
-			transfer(fd, msg_prank_on, msg_len);
+			transfer(fd, msg_prank_on, MSG_LEN);
 		}
 
 		free(line);
