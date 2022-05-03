@@ -79,7 +79,7 @@ signal.signal(signal.SIGINT, quit_handler)
 
 @app.route("/")
 def hello_world():
-    return render_template("hello.html")
+    return redirect(url_for('control'))
 
 
 @app.route("/control")
