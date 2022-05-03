@@ -23,8 +23,6 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
-
 #define IP_ADDR "IP_ADDR"
 #define LIGHT_ON "LIGHT_ON"
 #define LIGHT_OFF "LIGHT_OFF"
@@ -73,7 +71,7 @@ static void transfer(int fd, uint8_t *tx, uint8_t len)
 	struct spi_ioc_transfer tr = {
 		.tx_buf = (unsigned long)tx,
 		.rx_buf = (unsigned long)rx,
-		.len = ARRAY_SIZE(tx),
+		.len = len,
 		.delay_usecs = delay,
 		.speed_hz = speed,
 		.bits_per_word = bits,
