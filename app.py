@@ -1,4 +1,5 @@
 import datetime
+from pickle import TRUE
 import sys
 from typing import List, Tuple
 
@@ -133,7 +134,15 @@ def events():
 
 if __name__ == '__main__':
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(('8.8.8.8', 1))
+
+    while True:
+        try:
+            s.connect(('8.8.8.8', 1))
+            break
+        except OSError:
+            print("[Server] ERROR: Unable to get ip. Retry in 10", flush=True, file=sys.stderr)
+            time.sleep(10)
+
     ip = s.getsockname()[0]
     print(ip, flush=True, file=sys.stderr)
     send_ip(ip)
