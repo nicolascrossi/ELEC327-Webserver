@@ -13,7 +13,6 @@ import signal
 IP_HDR = "IP_ADDR"
 OFF_HDR = "LIGHT_OFF"
 ON_HDR = "LIGHT_ON"
-PRANK_OFF_HDR = "PRANK_OFF"
 PRANK_ON_HDR = "PRANK_ON"
 
 app = Flask(__name__)
@@ -35,11 +34,6 @@ def light_off():
 def light_on():
     print(f"{ON_HDR}", flush=True)
     print("[SERVER] Sent on", file=sys.stderr, flush=True)
-
-
-def prank_off():
-    print(f"{PRANK_OFF_HDR}", flush=True)
-    print("[SERVER] Sent prank off", file=sys.stderr, flush=True)
 
 
 def prank_on():
@@ -117,11 +111,6 @@ def control_form():
                 job = schedule.every().day.at(request.form.get("e_time")).do(prank_on)
                 jobs.append((job.at_time, f"Prank mode ON at {job.at_time}", job))
                 jobs.sort(key=jobs_sort)
-            elif e_option == "e_prank_off":
-                print(f"Scheduling prank mode off at {request.form.get('e_time')}", flush=True, file=sys.stderr)
-                job = schedule.every().day.at(request.form.get("e_time")).do(prank_off)
-                jobs.append((job.at_time, f"Prank mode OFF at {job.at_time}", job))
-                jobs.sort(key=jobs_sort)
         elif manage_e_option == "remove_event":
             print("Deleting event")
             to_delete_str = request.form.get("events")
@@ -145,8 +134,6 @@ def control_form():
             light_off()
         elif option == "prank_on":
             prank_on()
-        elif option == "prank_off":
-            prank_off()
 
     return redirect(url_for('control'))
 

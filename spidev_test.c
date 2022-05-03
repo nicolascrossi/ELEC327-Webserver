@@ -28,10 +28,12 @@
 #define IP_ADDR "IP_ADDR"
 #define LIGHT_ON "LIGHT_ON"
 #define LIGHT_OFF "LIGHT_OFF"
+#define PRANK_ON "PRANK_ON"
 
-#define LIGHT_OFF_CODE 0
-#define LIGHT_ON_CODE 1
-#define IP_ADDR_CODE 2
+#define LIGHT_OFF_CODE 1
+#define LIGHT_ON_CODE 2
+#define IP_ADDR_CODE 3
+#define PRANK_ON_CODE 4
 
 static void pabort(const char *s)
 {
@@ -48,6 +50,7 @@ static uint16_t delay;
 static uint8_t msg_len = 1;
 static uint8_t msg_off[1] = {LIGHT_OFF_CODE};
 static uint8_t msg_on[1] = {LIGHT_ON_CODE};
+static uint8_t msg_prank_on[1] = {PRANK_ON_CODE}
 
 static void transfer(int fd, uint8_t *tx, uint8_t len)
 {
@@ -239,7 +242,6 @@ int main(int argc, char *argv[])
 		if (count > sizeof(IP_ADDR) && strncmp(line, IP_ADDR, sizeof(IP_ADDR) - 1) == 0)
 		{
 			printf("Received IP: %s", line + sizeof(IP_ADDR));
-			// TODO: transfer the IP address to the MSP
 
 			line[sizeof(IP_ADDR) - 1] =  count - sizeof(IP_ADDR) - 1;
 			line[sizeof(IP_ADDR) - 2] = IP_ADDR_CODE;
@@ -248,14 +250,17 @@ int main(int argc, char *argv[])
 		else if (count >= sizeof(LIGHT_OFF) - 1 && strncmp(line, LIGHT_OFF, sizeof(LIGHT_OFF) - 1) == 0)
 		{
 			printf("Received LIGHT_OFF: %s", line);
-			// TODO: send off to the MSP
 			transfer(fd, msg_off, msg_len);
 		}
 		else if (count >= sizeof(LIGHT_ON) - 1 && strncmp(line, LIGHT_ON, sizeof(LIGHT_ON) - 1) == 0)
 		{
 			printf("Received LIGHT_ON: %s", line);
-			// TODO: send on to the MSP
 			transfer(fd, msg_on, msg_len);
+		}
+		else if (count >= sizeof(PRANK_ON) - 1 && strncmp(line, PRANK_ON, sizeof(PRANK_ON) - 1) == 0)
+		{
+			printf("Received PRANK_ON: %s", line);
+			transfer(fd, msg_prank_on, msg_len);
 		}
 
 		free(line);
