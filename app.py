@@ -133,7 +133,7 @@ def events():
 
 if __name__ == '__main__':
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect('8.8.8.8', 1)
+    s.connect(('8.8.8.8', 1))
     ip = s.getsockname()[0]
     print(ip, flush=True, file=sys.stderr)
     send_ip(ip)
