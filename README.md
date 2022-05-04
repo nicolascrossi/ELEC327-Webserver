@@ -1,3 +1,3 @@
 # ELEC327-Webserver
-
-`python app.py | <target>`
+Program usage is as follows:
+`python app.py | <target that emits SPI>`
