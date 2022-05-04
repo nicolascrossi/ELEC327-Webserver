@@ -23,42 +23,50 @@
 #include <stdbool.h>
 #include <string.h>
 
+// These are the headers for the messages coming from the server
 #define IP_ADDR "IP_ADDR"
 #define LIGHT_ON "LIGHT_ON"
 #define LIGHT_OFF "LIGHT_OFF"
 #define PRANK_ON "PRANK_ON"
 
-#define END 1
+// The values used for SPI
+#define END 1 				// Signifies the end of the message
 #define LIGHT_OFF_CODE 2
 #define LIGHT_ON_CODE 3
 #define IP_ADDR_CODE 4
 #define PRANK_ON_CODE 5
-#define MSG_LEN 2
+#define MSG_LEN 2			// Length of the messages without data
+
+// Functiont to handle potential errors
 static void pabort(const char *s)
 {
 	perror(s);
 	abort();
 }
 
+// Various variables to store relevant settings
 static const char *device = "/dev/spidev0.0";
 static uint8_t mode;
 static uint8_t bits = 8;
 static uint32_t speed = 500000;
 static uint16_t delay;
 
+// Predefined SPI messages when possible
 static uint8_t msg_off[MSG_LEN] = {LIGHT_OFF_CODE, END};
 static uint8_t msg_on[MSG_LEN] = {LIGHT_ON_CODE, END};
 static uint8_t msg_prank_on[MSG_LEN] = {PRANK_ON_CODE, END};
 
+// Transfers the message tx of length len to the file descriptor fd using SPI and the saved settings
 static void transfer(int fd, uint8_t *tx, uint8_t len)
 {
+	// For monitoring. Displays the contents of the message about to be sent
 	uint8_t i;
 	for (i = 0; i < len; i++) {
 		printf("%X ", tx[i]);
 	}
 	printf("\n");
 	
-	int ret;
+	int ret; // The return value of the attempted SPI transfer
 	// uint8_t tx[] = {
     //     0x48, 0x45, 0x4C, 0x4C, 0x4F,
     //     0x20, 
@@ -66,7 +74,7 @@ static void transfer(int fd, uint8_t *tx, uint8_t len)
     //     0x0A 
 	// };
 	// uint8_t rx[len] = {0, };
-	uint8_t *rx = malloc(len);
+	uint8_t *rx = malloc(len); // Buffer for the response (essentially unused)
 	memset(rx, 0, len);
 	struct spi_ioc_transfer tr = {
 		.tx_buf = (unsigned long)tx,
@@ -77,7 +85,7 @@ static void transfer(int fd, uint8_t *tx, uint8_t len)
 		.bits_per_word = bits,
 	};
 
-	ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+	ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr); // Actually send message
 	if (ret < 1)
 		pabort("can't send spi message");
 
@@ -92,6 +100,7 @@ static void transfer(int fd, uint8_t *tx, uint8_t len)
     */
 }
 
+// Help function to indicate how to call the program
 static void print_usage(const char *prog)
 {
 	printf("Usage: %s [-DsbdlHOLC3]\n", prog);
@@ -108,6 +117,7 @@ static void print_usage(const char *prog)
 	exit(1);
 }
 
+// Parses the options given to the program
 static void parse_opts(int argc, char *argv[])
 {
 	while (1) {
@@ -227,15 +237,17 @@ int main(int argc, char *argv[])
 
 	// transfer(fd);
 
-	char *line = NULL;
-	ssize_t line_len = 0;
-	int count;
+	// Enter the loop for parsing the output from the server
+	char *line = NULL; // Line read from stdin
+	ssize_t line_len = 0; // Length of line
+	int count; // Number of characters read
 
 	while (true) {
 		printf("Getting line...\n");
-		count = getline(&line, &line_len, stdin);
+		// getline will allocate memory as needed if line is NULL and line_len 0
+		count = getline(&line, &line_len, stdin); // Blocks until a line is available
 
-		if (count < 0) {
+		if (count < 0) { // Most likely the server was shutdown
 			perror("Error reading line");
 			free(line);
 			break;
@@ -243,31 +255,37 @@ int main(int argc, char *argv[])
 
 		printf("Read line \"%s\"", line);
 
+		// Chech if we've received an IP
 		if (count > sizeof(IP_ADDR) && strncmp(line, IP_ADDR, sizeof(IP_ADDR) - 1) == 0)
 		{
 			printf("Received IP: %s", line + sizeof(IP_ADDR));
 
-			line[sizeof(IP_ADDR) - 1] =  count - sizeof(IP_ADDR) - 1 + 1;
-			line[sizeof(IP_ADDR) - 2] = IP_ADDR_CODE;
-			line[count - 1] = END;
+			// [IP_ADDR_CODE, length of IP, ip bytes start, ..., ip bytes end, END]
+			line[sizeof(IP_ADDR) - 1] =  count - sizeof(IP_ADDR) - 1 + 1; // Set the length of the IP string
+			line[sizeof(IP_ADDR) - 2] = IP_ADDR_CODE; // Indicate this is an IP message
+			line[count - 1] = END; // Add the message end indicator
 			transfer(fd, (uint8_t *) line + sizeof(IP_ADDR) - 2, count - sizeof(IP_ADDR) - 1 + 2 + 1);
 		}
+		// Check if we've received light off
 		else if (count >= sizeof(LIGHT_OFF) - 1 && strncmp(line, LIGHT_OFF, sizeof(LIGHT_OFF) - 1) == 0)
 		{
 			printf("Received LIGHT_OFF: %s", line);
 			transfer(fd, msg_off, MSG_LEN);
 		}
+		// Check if we've receieved light on
 		else if (count >= sizeof(LIGHT_ON) - 1 && strncmp(line, LIGHT_ON, sizeof(LIGHT_ON) - 1) == 0)
 		{
 			printf("Received LIGHT_ON: %s", line);
 			transfer(fd, msg_on, MSG_LEN);
 		}
+		// Check if we've received prank mode on
 		else if (count >= sizeof(PRANK_ON) - 1 && strncmp(line, PRANK_ON, sizeof(PRANK_ON) - 1) == 0)
 		{
 			printf("Received PRANK_ON: %s", line);
 			transfer(fd, msg_prank_on, MSG_LEN);
 		}
 
+		// Reset variables to get the next line
 		free(line);
 		line_len = 0;
 	}
